@@ -3,9 +3,6 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { ApiserviceService } from './apiservice.service';
-import { Observable } from 'rxjs';
-import { DomSanitizer } from '@angular/platform-browser'
-import { PipeTransform, Pipe } from "@angular/core";
 
 @Component({
   selector: 'app-root',
@@ -18,20 +15,40 @@ import { PipeTransform, Pipe } from "@angular/core";
 @Injectable({providedIn:'root'})
 export class AppComponent {
   title = 'angular'
-  income: string = ' ';
-  constructor (private apiService: ApiserviceService, private http: HttpClient){}
-  onclick(event: any) {
-    let req = this.http.get('https://api.worldbank.org/v2/country/${event.country}/?format=json');
-    console.log(req.subscribe());
+  constructor (private apiService: ApiserviceService, private http: HttpClient) {
+    this.dataName = "";
+    this.capital = "";
+    this.income = "";
+    this.regionName = "";
+    this.regionId = "";
+    this.countryCode = "";
   }
 
+  public dataName : string;
+  public capital : string;
+  public income : string;
+  public regionName : string;
+  public regionId : string;
+  public countryCode : string;
+
+  onclick(event: any) {
+    let country = event.target["id"];
+    this.http.get(`https://api.worldbank.org/v2/country/${country}/?format=json`)
+      .subscribe((res) => {
+      let resSTR = JSON.stringify(res);
+      let resJSON = JSON.parse(resSTR);
+      this.dataName = resJSON[1][0]["name"];
+      this.capital = resJSON[1][0]["capitalCity"];
+      this.income = resJSON[1][0]["incomeLevel"]["value"];
+      this.regionName = resJSON[1][0]["region"]["value"];
+      this.regionId = resJSON[1][0]["region"]["id"];
+      this.countryCode = resJSON[1][0]["iso2Code"];
+      console.log(resJSON[1][0]);
+    });
+
+
+  }
 }
-
-
-
-
-
-
 
 // private loadDoc(country : string) {
 //   var xhr = new XMLHttpRequest();
